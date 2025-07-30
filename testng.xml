@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Suite" verbose="5"  parallel="methods" thread-count="5">
+  <listeners>
+       <listener class-name="org.iitwf.healthcare.mmp.utils.ListenerUtility"/>
+  </listeners> 
+  <test thread-count="5" name="Test">
+    <classes>
+    <class name="org.iitwf.heathcare.mmp.testcases.RegistrationE2E"/>
+      <class name="org.iitwf.heathcare.mmp.testcases.SendMessagesE2E"/>
+     <class name="org.iitwf.heathcare.mmp.testcases.ScheduleAppointmentTests_POM"/>
+      <class name="org.iitwf.heathcare.mmp.testcases.ProfilePageTest"/>
+    </classes>
+  </test> <!-- Test -->
+</suite> <!-- Suite -->
