@@ -1,8 +1,8 @@
 package org.iitwf.heathcare.mmp;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import org.junit.jupiter.api.Test;
+import org.testng.annotations.Test;
+import org.testng.AssertJUnit;
+import org.testng.annotations.Test;
 
 /**
  * Unit test for simple App.
@@ -25,6 +25,6 @@ public class AppTest {
     	String splited2=splited[1]; //I'm
     	String splited3=splited[2]; //your
     	//var splited4=splited[3]; //String
-        assertTrue(true);
+        AssertJUnit.assertTrue(true);
     }
 }
