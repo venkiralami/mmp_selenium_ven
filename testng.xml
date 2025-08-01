@@ -4,7 +4,7 @@
   <listeners>
        <listener class-name="org.iitwf.healthcare.mmp.utils.ListenerUtility"/>
   </listeners> 
-  <test thread-count="5" name="Test">
+  <test thread-count="1" name="Test">
     <classes>
     <class name="org.iitwf.heathcare.mmp.testcases.RegistrationE2E"/>
       <class name="org.iitwf.heathcare.mmp.testcases.SendMessagesE2E"/>
