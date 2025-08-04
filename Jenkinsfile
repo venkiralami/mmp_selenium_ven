@@ -30,7 +30,7 @@ pipeline {
                 withSonarQubeEnv("${SONARQUBE_ENV}") {
 					
                     sh '''
-                       mvn clean test jacoco:report sonar:sonar \
+                       mvn jacoco:report sonar:sonar \
    						 -Dsonar.projectKey=mmp_selenium_ven \
    						 -Dsonar.host.url=http://localhost:9000 \
    						 -Dsonar.login=sqa_e9f060a5bab7ae0dae124a41ee67171135152253 \
