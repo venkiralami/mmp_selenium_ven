@@ -18,7 +18,11 @@ pipeline {
             }
         }
 
-        
+        stage('Build') {
+            steps {
+                sh 'mvn clean install'
+            }
+        }
         
         
         stage('SonarQube Analysis') {
@@ -54,7 +58,7 @@ pipeline {
 
         
     }
-
+/*
     post {
         always {
             archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
@@ -66,4 +70,5 @@ pipeline {
                  body: "Check Jenkins for details: ${env.BUILD_URL}"
         }
     }
-}
+    */
+    }
