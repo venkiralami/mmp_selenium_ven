@@ -7,9 +7,7 @@ pipeline {
     }
 
     environment {
-        REPORT_DIR = 'test-output'      
-       SONARQUBE_ENV = 'LocalSonar'
-    
+           SONARQUBE_ENV = 'LocalSonar'
     }
 
     stages {
@@ -55,13 +53,22 @@ pipeline {
                 }
             }
         }
-        stage('Publish Reports') {
-            steps {
-                publishHTML([reportDir: "${env.REPORT_DIR}",
-                             reportFiles: 'ExtentReport.html',
-                             reportName: 'Extent Report'])
-            }
+        stage('Publish HTML Report') {
+    steps {
+        script {
+            publishHTML([
+                reportDir: 'target/surefire-reports',
+                reportFiles: 'index.html',
+                reportName: 'Surefire Report',
+                keepAll: true,
+                allowMissing: false,
+                alwaysLinkToLastBuild: true
+            ])
         }
+    }
+}
+
+        
     }
 
     post {
