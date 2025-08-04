@@ -22,13 +22,18 @@
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-java</artifactId>
-			<version>4.33.0</version>
+			<version>4.34.0</version>
 		</dependency>
 
+<dependency>
+    <groupId>org.seleniumhq.selenium</groupId>
+    <artifactId>selenium-chrome-driver</artifactId>
+    <version>4.34.0</version>
+</dependency>
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-firefox-driver</artifactId>
-			<version>4.33.0</version> <!-- Use the latest stable version -->
+			<version>4.34.0</version> <!-- Use the latest stable version -->
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.junit/junit-bom -->
 		<dependency>
@@ -99,6 +104,10 @@
 
 	<build>
 		<plugins>
+		
+    
+  
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
@@ -107,6 +116,7 @@
 					<suiteXmlFiles>
 						<suiteXmlFile>testng.xml</suiteXmlFile>
 					</suiteXmlFiles>
+					<reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
 				</configuration>
 			</plugin>
 			<plugin>
