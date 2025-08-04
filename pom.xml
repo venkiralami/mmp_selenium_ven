@@ -30,14 +30,15 @@
 			<artifactId>selenium-firefox-driver</artifactId>
 			<version>4.33.0</version> <!-- Use the latest stable version -->
 		</dependency>
-
+		<!-- https://mvnrepository.com/artifact/org.junit/junit-bom -->
 		<dependency>
 			<groupId>org.junit</groupId>
 			<artifactId>junit-bom</artifactId>
-			<version>5.11.0</version>
+			<version>6.0.0-M2</version>
 			<type>pom</type>
-			<scope>import</scope>
+			<scope>test</scope>
 		</dependency>
+
 
 		<dependency>
 			<groupId>org.testng</groupId>
@@ -79,6 +80,13 @@
 			<artifactId>jacoco-maven-plugin</artifactId>
 			<version>0.8.13</version>
 		</dependency>
+		<!--
+		https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-surefire-plugin -->
+		<dependency>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-surefire-plugin</artifactId>
+			<version>3.5.3</version>
+		</dependency>
 	</dependencies>
 
 
@@ -87,7 +95,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.2.5</version>
+				<version>3.5.3</version>
 				<configuration>
 					<suiteXmlFiles>
 						<suiteXmlFile>testng.xml</suiteXmlFile>
