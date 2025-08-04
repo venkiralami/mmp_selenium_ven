@@ -7,8 +7,7 @@ pipeline {
     }
 
     environment {
-        REPORT_DIR = "test-output"
-        
+        REPORT_DIR = 'test-output'      
        SONARQUBE_ENV = 'LocalSonar'
     
     }
@@ -33,20 +32,14 @@ pipeline {
             }
         }
 
-        stage('Publish Reports') {
-            steps {
-                publishHTML([reportDir: "${env.REPORT_DIR}",
-                             reportFiles: 'ExtentReport.html',
-                             reportName: 'Extent Report'])
-            }
-        }
+        
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv("${SONARQUBE_ENV}") {
 					
                     sh '''
                         mvn sonar:sonar \
-                        -Dsonar.projectKey=PlaywrightProject \
+                        -Dsonar.projectKey=mmp_selenium_ven \
                         -Dsonar.host.url=http://localhost:9000 \
                         -Dsonar.login=sqa_e9f060a5bab7ae0dae124a41ee67171135152253
                     '''
@@ -60,6 +53,13 @@ pipeline {
                 timeout(time: 1, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
                 }
+            }
+        }
+        stage('Publish Reports') {
+            steps {
+                publishHTML([reportDir: "${env.REPORT_DIR}",
+                             reportFiles: 'ExtentReport.html',
+                             reportName: 'Extent Report'])
             }
         }
     }
