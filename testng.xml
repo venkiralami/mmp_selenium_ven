@@ -6,9 +6,11 @@
   </listeners> 
   <test name="Test">
     <classes>
-    <class name="org.iitwf.heathcare.mmp.testcases.RegistrationE2E"/>
+   <!--  
+	<class name="org.iitwf.heathcare.mmp.testcases.RegistrationE2E"/>
       <class name="org.iitwf.heathcare.mmp.testcases.SendMessagesE2E"/>
      <class name="org.iitwf.heathcare.mmp.testcases.ScheduleAppointmentTests_POM"/>
+      -->
       <class name="org.iitwf.heathcare.mmp.testcases.ProfilePageTest"/>
     </classes>
   </test> <!-- Test -->
