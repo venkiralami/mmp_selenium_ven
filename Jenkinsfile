@@ -8,6 +8,9 @@ pipeline {
 
     environment {
         REPORT_DIR = "test-output"
+        
+       SONARQUBE_ENV = 'LocalSonar'
+    
     }
 
     stages {
@@ -35,6 +38,28 @@ pipeline {
                 publishHTML([reportDir: "${env.REPORT_DIR}",
                              reportFiles: 'ExtentReport.html',
                              reportName: 'Extent Report'])
+            }
+        }
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv("${SONARQUBE_ENV}") {
+					
+                    sh '''
+                        mvn sonar:sonar \
+                        -Dsonar.projectKey=PlaywrightProject \
+                        -Dsonar.host.url=http://localhost:9000 \
+                        -Dsonar.login=sqa_e9f060a5bab7ae0dae124a41ee67171135152253
+                    '''
+                    
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 1, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
             }
         }
     }
