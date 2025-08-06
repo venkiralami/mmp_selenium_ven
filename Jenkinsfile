@@ -5,7 +5,11 @@ pipeline {
         maven 'Maven'
         jdk 'JAVA_HOME'
     }
-
+    
+	parameters {
+        string(name: 'Branch_Name', defaultValue: 'working_v1.0', description: 'Git Branch to be built')
+    }
+    
     environment {
            SONARQUBE_ENV = 'LocalSonar'
     }
@@ -13,7 +17,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'working_v1.0',
+                git branch: "${params.Branch_Name}",
                     url: 'https://github.com/venkiralami/mmp_selenium_ven.git'
             }
         }
