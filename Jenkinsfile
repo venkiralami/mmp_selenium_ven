@@ -39,9 +39,9 @@ pipeline {
                     if (extentFile && fileExists(extentFile)) {
                         def content = readFile(extentFile)
 
-                        def passMatch = content =~ /Pass<\/.*?>(\d+)/
-                        def failMatch = content =~ /Fail<\/.*?>(\d+)/
-                        def skipMatch = content =~ /Skip<\/.*?>(\d+)/
+                        def passMatch = content =~ /Tests Passed<\/.*?>(\d+)/
+                        def failMatch = content =~ /Tests Failed<\/.*?>(\d+)/
+                        def skipMatch = content =~ /Tests Skipped<\/.*?>(\d+)/
 
                         passedCount  = passMatch ? passMatch[0][1] : "0"
                         failedCount  = failMatch ? failMatch[0][1] : "0"
