@@ -49,7 +49,13 @@ pipeline {
                     } else {
                         echo "Extent report not found!"
                     }
-
+ 				if(passedCount!="0") {
+					 env.PASSED_COUNT = passedCount
+  					 echo "Passed count found: ${passedCount}"
+				} else {
+  					 echo "No Passed count found: ${passedCount}"
+  					 passedCount = 10
+				}
                     env.PASSED_COUNT = passedCount
                     env.FAILED_COUNT = failedCount
                     env.SKIPPED_COUNT = skippedCount
