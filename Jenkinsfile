@@ -17,18 +17,7 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
-            steps {
-                git branch: "${params.Branch_Name}",
-                    url: 'https://github.com/venkiralami/mmp_selenium_ven.git'
-            }
-        }
-
-        stage('Build & Test') {
-            steps {
-                sh 'mvn clean test'
-            }
-        }
+        
         
         stage('Archive Reports') {
             steps {
