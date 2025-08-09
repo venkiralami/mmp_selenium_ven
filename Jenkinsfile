@@ -17,7 +17,18 @@ pipeline {
     }
 
     stages {
-        
+        stage('Checkout') {
+            steps {
+                git branch: "${params.Branch_Name}",
+                    url: 'https://github.com/venkiralami/mmp_selenium_ven.git'
+            }
+        }
+
+        stage('Build & Test') {
+            steps {
+                sh 'mvn clean test'
+            }
+        }
         
         stage('Archive Reports') {
             steps {
@@ -114,7 +125,19 @@ pipeline {
             }
         }
         
-       
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv("${SONARQUBE_ENV}") {
+                    sh '''
+                       mvn jacoco:report sonar:sonar \
+                         -Dsonar.projectKey=mmp_selenium_ven \
+                         -Dsonar.host.url=http://localhost:9000 \
+                         -Dsonar.login=sqa_e9f060a5bab7ae0dae124a41ee67171135152253 \
+                         -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+                    '''
+                }
+            }
+        }
     }
 
     post {
