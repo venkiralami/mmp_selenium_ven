@@ -1,3 +1,6 @@
+@Grab('org.jsoup:jsoup:1.17.2')
+import org.jsoup.Jsoup
+
 pipeline {
     agent any
 
@@ -12,6 +15,8 @@ pipeline {
     
     environment {
            SONARQUBE_ENV = 'LocalSonar'
+           surefireReport = "target/surefire-reports/*"
+           extentReport = "target/ExtentReport_*.html"
     }
 
     stages {
@@ -24,26 +29,65 @@ pipeline {
 
         stage('Build') {
             steps {
-               sh 'mvn clean test surefire-report:report'
+               sh 'mvn clean test'
+            }
+        }
+         stage('Archive Reports') {
+            steps {
+                // Archive reports so they can be accessed via Jenkins
+                archiveArtifacts artifacts: "${surefireReport}, ${extentReport}", fingerprint: true
+
             }
         }
         
-        
-        stage('SonarQube Analysis') {
+         stage('Email Report') {
             steps {
-                withSonarQubeEnv("${SONARQUBE_ENV}") {
-					
-                    sh '''
-                       mvn jacoco:report sonar:sonar \
-   						 -Dsonar.projectKey=mmp_selenium_ven \
-   						 -Dsonar.host.url=http://localhost:9000 \
-   						 -Dsonar.login=sqa_e9f060a5bab7ae0dae124a41ee67171135152253 \
-  					 	 -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
-                    '''
-                    
+                script {
+                    def passedCount = 0
+                    def failedCount = 0
+                    def skippedCount = 0
+
+                    if (fileExists(extentReport)) {
+                        def html = readFile(extentReport)
+                        def doc = Jsoup.parse(html)
+
+                        // Try to locate summary section (update selectors based on your Extent template)
+                        // Example: If Extent summary table has a row with these labels
+                        passedCount  = doc.select("td:matchesOwn(^Pass\$)").first()?.nextElementSibling()?.text()?.toInteger() ?: 0
+                        failedCount  = doc.select("td:matchesOwn(^Fail\$)").first()?.nextElementSibling()?.text()?.toInteger() ?: 0
+                        skippedCount = doc.select("td:matchesOwn(^Skip\$)").first()?.nextElementSibling()?.text()?.toInteger() ?: 0
+                    } else {
+                        echo "Extent report not found at: ${extentReport}"
+                    }
+
+                    emailext(
+                        to: 'venki.ralami@gmail.com',
+                        subject: "Test Report - ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                        body: """
+                        <html>
+                        <body>
+                        <h2>Test Execution Summary</h2>
+                        <table border="1" cellpadding="5" cellspacing="0">
+                          <tr>
+                            <th>Passed</th><th>Failed</th><th>Skipped</th>
+                          </tr>
+                          <tr>
+                            <td>${passedCount}</td><td>${failedCount}</td><td>${skippedCount}</td>
+                          </tr>
+                        </table>
+                        <p>Full Extent Report: <a href="${env.BUILD_URL}artifact/${extentReport}">View Report</a></p>
+                        </body>
+                        </html>
+                        """,
+                        mimeType: 'text/html'
+                    )
                 }
             }
         }
+    
+        
+        
+        
 
         stage('Publish HTML Report') {
     steps {
@@ -59,9 +103,24 @@ pipeline {
         }
     }
 }
-
+stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv("${SONARQUBE_ENV}") {
+					
+                    sh '''
+                       mvn jacoco:report sonar:sonar \
+   						 -Dsonar.projectKey=mmp_selenium_ven \
+   						 -Dsonar.host.url=http://localhost:9000 \
+   						 -Dsonar.login=sqa_e9f060a5bab7ae0dae124a41ee67171135152253 \
+  					 	 -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+                    '''
+                    
+                }
+            }
+        }
+}
         
-    }
+    
 post {
         always {
             script {
@@ -105,4 +164,5 @@ post {
             }
         }
     }
+    
     }
