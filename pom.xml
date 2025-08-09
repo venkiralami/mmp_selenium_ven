@@ -104,7 +104,13 @@
 			<artifactId>mysql-connector-java</artifactId>
 			<version>8.0.33</version>
 		</dependency>
-
+		<!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
+		<!-- This is to parse extent HTML report -->
+		<dependency>
+			<groupId>org.jsoup</groupId>
+			<artifactId>jsoup</artifactId>
+			<version>1.21.1</version>
+		</dependency>
 	</dependencies>
 
 

@@ -1,6 +1,3 @@
-@Grab('org.jsoup:jsoup:1.17.2')
-import org.jsoup.Jsoup
-
 pipeline {
     agent any
 
@@ -15,8 +12,9 @@ pipeline {
     
     environment {
            SONARQUBE_ENV = 'LocalSonar'
-           surefireReport = "target/surefire-reports/*"
-           extentReport = "target/ExtentReport_*.html"
+           SUREFIRE_REPORT = "target/surefire-reports/*"
+           EXTENT_REPORT = "target/ExtentReport_*.html"
+           
     }
 
     stages {
@@ -27,69 +25,81 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Build & Test') {
             steps {
                sh 'mvn clean test'
             }
         }
-         stage('Archive Reports') {
-            steps {
-                // Archive reports so they can be accessed via Jenkins
-                archiveArtifacts artifacts: "${surefireReport}, ${extentReport}", fingerprint: true
-
-            }
-        }
         
-         stage('Email Report') {
+        stage('Archive Reports') {
             steps {
                 script {
-                    def passedCount = 0
-                    def failedCount = 0
-                    def skippedCount = 0
-
-                    if (fileExists(extentReport)) {
-                        def html = readFile(extentReport)
-                        def doc = Jsoup.parse(html)
-
-                        // Try to locate summary section (update selectors based on your Extent template)
-                        // Example: If Extent summary table has a row with these labels
-                        passedCount  = doc.select("td:matchesOwn(^Pass\$)").first()?.nextElementSibling()?.text()?.toInteger() ?: 0
-                        failedCount  = doc.select("td:matchesOwn(^Fail\$)").first()?.nextElementSibling()?.text()?.toInteger() ?: 0
-                        skippedCount = doc.select("td:matchesOwn(^Skip\$)").first()?.nextElementSibling()?.text()?.toInteger() ?: 0
-                    } else {
-                        echo "Extent report not found at: ${extentReport}"
-                    }
-
-                    emailext(
-                        to: 'venki.ralami@gmail.com',
-                        subject: "Test Report - ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                        body: """
-                        <html>
-                        <body>
-                        <h2>Test Execution Summary</h2>
-                        <table border="1" cellpadding="5" cellspacing="0">
-                          <tr>
-                            <th>Passed</th><th>Failed</th><th>Skipped</th>
-                          </tr>
-                          <tr>
-                            <td>${passedCount}</td><td>${failedCount}</td><td>${skippedCount}</td>
-                          </tr>
-                        </table>
-                        <p>Full Extent Report: <a href="${env.BUILD_URL}artifact/${extentReport}">View Report</a></p>
-                        </body>
-                        </html>
-                        """,
-                        mimeType: 'text/html'
-                    )
+                    // Archive so they are accessible in Jenkins
+                    archiveArtifacts artifacts: "${SUREFIRE_REPORT}, ${EXTENT_REPORT}", fingerprint: true
                 }
             }
         }
-    
-        
-        
-        
 
-        stage('Publish HTML Report') {
+        stage('Parse Extent Report') {
+            steps {
+                script {
+                    // Use pure Groovy (no @Grab) to parse counts
+                    def extentFile = new File("${WORKSPACE}/${EXTENT_REPORT}")
+                    def passedCount = "0"
+                    def failedCount = "0"
+                    def skippedCount = "0"
+
+                    if (extentFile.exists()) {
+                        def content = extentFile.text
+
+                        // Regex based on Extent HTML patterns
+                        def passMatch = content =~ /Pass<\/.*?>(\d+)/
+                        def failMatch = content =~ /Fail<\/.*?>(\d+)/
+                        def skipMatch = content =~ /Skip<\/.*?>(\d+)/
+
+                        passedCount  = passMatch ? passMatch[0][1] : "0"
+                        failedCount  = failMatch ? failMatch[0][1] : "0"
+                        skippedCount = skipMatch ? skipMatch[0][1] : "0"
+                    }
+
+                    // Save counts to environment vars for email
+                    env.PASSED_COUNT  = passedCount
+                    env.FAILED_COUNT  = failedCount
+                    env.SKIPPED_COUNT = skippedCount
+                }
+            }
+        }
+                
+        
+stage('Send Email') {
+        steps {
+            script {
+                emailext(
+                    subject: "Test Execution Report - ${currentBuild.fullDisplayName}",
+                    body: """
+                        <h3>Automation Test Summary</h3>
+                        <table border="1" cellpadding="5">
+                            <tr><th>Passed</th><th>Failed</th><th>Skipped</th></tr>
+                            <tr>
+                                <td style="color:green">${env.PASSED_COUNT}</td>
+                                <td style="color:red">${env.FAILED_COUNT}</td>
+                                <td style="color:orange">${env.SKIPPED_COUNT}</td>
+                            </tr>
+                        </table>
+                        <br>
+                        <b>Extent Report:</b> <a href="${BUILD_URL}artifact/${EXTENT_REPORT}">View Report</a><br>
+                        <b>Surefire Report:</b> <a href="${BUILD_URL}artifact/${SUREFIRE_REPORT}">View Report</a>
+                        <br><br>
+                        <i>Generated by Jenkins on ${new Date()}</i>
+                    """,
+                    to: 'venki.ralami@gmail.com',
+                    mimeType: "text/html",                    
+                    attachmentsPattern: EXTENT_REPORT
+                )
+            }
+        }
+    }
+    stage('Publish HTML Report') {
     steps {
         script {
             publishHTML([
@@ -103,6 +113,7 @@ pipeline {
         }
     }
 }
+    
 stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv("${SONARQUBE_ENV}") {
@@ -134,13 +145,19 @@ post {
                 // Read Extent report content to extract counts
                 def passedCount = 0
                 def failedCount = 0
-                if (fileExists(extentReport)) {
-                    def extentHtml = readFile(extentReport)
-                    def passMatch = (extentHtml =~ /class="pass">(\d+)</)
-                    def failMatch = (extentHtml =~ /status="pass">(\d+)</)
-                    passedCount = passMatch ? passMatch[0][1] : "N/A"
-                    failedCount = failMatch ? failMatch[0][1] : "N/A"
-                }
+                if (extentReport.exists()) {
+                        def content = extentReport.text
+
+                        // Regex based on Extent HTML patterns
+                        def passMatch = content =~ /Pass<\/.*?>(\d+)/
+                        def failMatch = content =~ /Fail<\/.*?>(\d+)/
+                        def skipMatch = content =~ /Skip<\/.*?>(\d+)/
+
+                        passedCount  = passMatch ? passMatch[0][1] : "0"
+                        failedCount  = failMatch ? failMatch[0][1] : "0"
+                        skippedCount = skipMatch ? skipMatch[0][1] : "0"
+                    }
+                
 
                 // Build HTML body for email
                 def emailBody = """
