@@ -62,17 +62,47 @@ pipeline {
 
         
     }
-/*
-    post {
+post {
         always {
-         //   archiveArtifacts artifacts: '**target/*.jar', fingerprint: true
-            junit 'test-output/testng-results.xml'
-        }
-        failure {
-            mail to: 'venki.ralami@gmail.com',
-                 subject: "Build Failed: ${env.JOB_NAME}",
-                 body: "Check Jenkins for details: ${env.BUILD_URL}"
+            script {
+                // Paths to reports
+                def surefireReport = "target/surefire-reports/index.html"
+                def extentReport = "target/ExtentReport_*.html"
+
+                // Archive reports so they can be accessed via Jenkins
+                archiveArtifacts artifacts: "${surefireReport}, ${extentReport}", fingerprint: true
+
+                // Read Extent report content to extract counts
+                def passedCount = 0
+                def failedCount = 0
+                if (fileExists(extentReport)) {
+                    def extentHtml = readFile(extentReport)
+                    def passMatch = (extentHtml =~ /class="pass">(\d+)</)
+                    def failMatch = (extentHtml =~ /class="fail">(\d+)</)
+                    passedCount = passMatch ? passMatch[0][1] : "N/A"
+                    failedCount = failMatch ? failMatch[0][1] : "N/A"
+                }
+
+                // Build HTML body for email
+                def emailBody = """
+                    <h2>Automation Test Execution Report</h2>
+                    <p><b>Job:</b> ${env.JOB_NAME}</p>
+                    <p><b>Build Number:</b> ${env.BUILD_NUMBER}</p>
+                    <p><b>Passed:</b> ${passedCount}</p>
+                    <p><b>Failed:</b> ${failedCount}</p>
+                    <p><a href="${env.BUILD_URL}artifact/${surefireReport}">Surefire HTML Report</a></p>
+                    <p><a href="${env.BUILD_URL}artifact/${extentReport}">Extent HTML Report</a></p>
+                """
+
+                // Send email
+                emailext(
+                    subject: "Test Execution Report - ${currentBuild.currentResult} - Build #${BUILD_NUMBER}",
+                    body: emailBody,
+                    mimeType: 'text/html',
+                    to: 'venki.ralami@gmail.com',
+                    attachmentsPattern: extentReport
+                )
+            }
         }
     }
-    */
     }
