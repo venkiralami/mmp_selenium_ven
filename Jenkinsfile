@@ -24,7 +24,7 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'mvn clean install'
+               sh 'mvn clean test surefire-report:report'
             }
         }
         
@@ -78,7 +78,7 @@ post {
                 if (fileExists(extentReport)) {
                     def extentHtml = readFile(extentReport)
                     def passMatch = (extentHtml =~ /class="pass">(\d+)</)
-                    def failMatch = (extentHtml =~ /class="fail">(\d+)</)
+                    def failMatch = (extentHtml =~ /status="pass">(\d+)</)
                     passedCount = passMatch ? passMatch[0][1] : "N/A"
                     failedCount = failMatch ? failMatch[0][1] : "N/A"
                 }
