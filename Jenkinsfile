@@ -23,10 +23,16 @@ pipeline {
                     url: 'https://github.com/venkiralami/mmp_selenium_ven.git'
             }
         }
-
+        
+		stage('Run Tests on Grid') {
+            steps {
+                sh 'mvn clean test -DsuiteXmlFile=testng_Parallell_Grid.xml'
+            }
+        }
+        
         stage('Build & Test') {
             steps {
-                sh 'mvn clean test'
+              //  sh 'mvn clean test'
             }
         }
         
