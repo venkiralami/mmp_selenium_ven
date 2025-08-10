@@ -30,11 +30,7 @@ pipeline {
             }
         }
         
-        stage('Build & Test') {
-            steps {
-              //  sh 'mvn clean test'
-            }
-        }
+        
         
         stage('Archive Reports') {
             steps {
