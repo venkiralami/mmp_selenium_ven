@@ -21,8 +21,8 @@ public class GridExampleTest {
         } else if (browser.equalsIgnoreCase("firefox")) {
             caps.setBrowserName("firefox");
         }
-
-        driver = new RemoteWebDriver(new URL("http://localhost:4444/wd/hub"), caps);
+        System.out.println("Running tests on: " + browser);
+        driver = new RemoteWebDriver(new URL("http://localhost:4444"), caps);
     }
 
     @Test
