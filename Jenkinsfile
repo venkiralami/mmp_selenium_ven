@@ -12,6 +12,8 @@ pipeline {
     
     environment {
         SONARQUBE_ENV = 'LocalSonar'
+         SONAR_PROJECT_KEY = 'mmp_selenium_ven'
+        SONAR_URL = 'http://localhost:9000'
         SUREFIRE_REPORT_PATTERN = "target/surefire-reports/testng-results.xml"
         EXTENT_REPORT_PATTERN = "target/ExtentReport_*.html"
     }
@@ -192,6 +194,8 @@ pipeline {
                     <br><br>
                     <h4>Extent Report:</h4>
                     📊 <a href="${env.BUILD_URL}artifact/${extentReportPath}">View Full Extent Report</a>
+                    <br><br>
+                    <p>🔗 <a href="${SONAR_URL}/dashboard?id=${SONAR_PROJECT_KEY}">View Full SonarQube Report</a></p>
                     <br><br>
                     ${extentReportHtml}
                 """
