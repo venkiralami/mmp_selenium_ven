@@ -6,7 +6,7 @@ pipeline {
         jdk 'JAVA_HOME'
     }
     
-    parameters {
+    parameters { 
         string(name: 'Branch_Name', defaultValue: 'working_v1.0', description: 'Git Branch to be built')
     }
     
