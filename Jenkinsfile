@@ -184,7 +184,7 @@ stage('Format Extent Report Summary Latest') {
                       <td><b>${env.PASS_PERCENTAGE}%</b></td>
                     </tr>
                   </table>
-                  <p>📄 Full report: <a href="file://${env.WORKSPACE}/${env.EXTENT_REPORT_FILE}">Extent Report</a></p>
+                  <p>📄 Full report: <a href="file://${env.WORKSPACE}/${env.EXTENT_REPORT_FILE}">Extent/Sure Report</a></p>
                 </body>
                 </html>
             """
