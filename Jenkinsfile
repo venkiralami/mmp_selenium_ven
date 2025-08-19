@@ -84,6 +84,131 @@ pipeline {
             }
         }
         
+        stage('Parse Extent Report Latest') {
+    steps {
+        script {
+            def extentFiles = findFiles(glob: "${EXTENT_REPORT_PATTERN}")
+            def extentFile = extentFiles ? extentFiles[0].path : null
+
+            def passedCount = 0
+            def failedCount = 0
+            def skippedCount = 0
+
+            if (extentFile && fileExists(extentFile)) {
+                def content = readFile(extentFile)
+
+                // Regex tuned for your Extent report format
+                def passMatch = content =~ /Tests Passed\s*([\d]+)/
+                def failMatch = content =~ /Tests Failed\s*([\d]+)/
+                def skipMatch = content =~ /Tests Skipped\s*([\d]+)/
+
+                passedCount  = passMatch ? passMatch[0][1].toInteger() : 0
+                failedCount  = failMatch ? failMatch[0][1].toInteger() : 0
+                skippedCount = skipMatch ? skipMatch[0][1].toInteger() : 0
+
+                echo "Extent Report Parsed -> Passed: ${passedCount}, Failed: ${failedCount}, Skipped: ${skippedCount}"
+            } else {
+                echo "❌ Extent report not found at ${EXTENT_REPORT_PATTERN}"
+            }
+
+            // Calculate totals
+            def totalTests = passedCount + failedCount + skippedCount
+            def passPercentage = (totalTests > 0) ? ((passedCount * 100) / totalTests) : 0
+
+            echo "📊 Total Tests: ${totalTests}, Pass %: ${passPercentage}%"
+
+            // Export to environment variables
+            env.PASSED_COUNT     = passedCount.toString()
+            env.FAILED_COUNT     = failedCount.toString()
+            env.SKIPPED_COUNT    = skippedCount.toString()
+            env.TOTAL_TESTS      = totalTests.toString()
+            env.PASS_PERCENTAGE  = passPercentage.toString()
+            env.EXTENT_REPORT_FILE = extentFile ?: ''
+        }
+    }
+}
+
+stage('Format Extent Report Summary Latest') {
+    steps {
+        script {
+            // Build a styled HTML table
+            def htmlReport = """
+                <html>
+                <head>
+                  <style>
+                    table {
+                      border-collapse: collapse;
+                      width: 50%;
+                      font-family: Arial, sans-serif;
+                      margin: 10px 0;
+                    }
+                    th, td {
+                      border: 1px solid #ddd;
+                      padding: 8px;
+                      text-align: center;
+                    }
+                    th {
+                      background-color: #4CAF50;
+                      color: white;
+                    }
+                    .pass { background-color: #c8e6c9; }   /* green */
+                    .fail { background-color: #ffcdd2; }   /* red */
+                    .skip { background-color: #fff9c4; }   /* yellow */
+                  </style>
+                </head>
+                <body>
+                  <h3>📊 Test Execution Summary</h3>
+                  <table>
+                    <tr>
+                      <th>Metric</th>
+                      <th>Count</th>
+                    </tr>
+                    <tr class="pass">
+                      <td>✅ Passed</td>
+                      <td>${env.PASSED_COUNT}</td>
+                    </tr>
+                    <tr class="fail">
+                      <td>❌ Failed</td>
+                      <td>${env.FAILED_COUNT}</td>
+                    </tr>
+                    <tr class="skip">
+                      <td>⚠️ Skipped</td>
+                      <td>${env.SKIPPED_COUNT}</td>
+                    </tr>
+                    <tr>
+                      <td><b>Total Tests</b></td>
+                      <td><b>${env.TOTAL_TESTS}</b></td>
+                    </tr>
+                    <tr>
+                      <td><b>Pass %</b></td>
+                      <td><b>${env.PASS_PERCENTAGE}%</b></td>
+                    </tr>
+                  </table>
+                  <p>📄 Full report: <a href="file://${env.WORKSPACE}/${env.EXTENT_REPORT_FILE}">Extent Report</a></p>
+                </body>
+                </html>
+            """
+
+            // Save HTML summary for email/Slack
+            writeFile file: "summary.html", text: htmlReport
+            env.SUMMARY_HTML = readFile("summary.html")
+        }
+    }
+}
+ stage('Send Email Latest') {
+            steps {
+                script {
+                   
+                    emailext(
+            subject: "📢 Test Execution Results: ${currentBuild.currentResult}",
+            to: "team@example.com",
+            mimeType: 'text/html',
+            body: "${env.SUMMARY_HTML}"
+        )
+                }
+            }
+        }
+        
         stage('Send Email') {
             steps {
                 script {
