@@ -87,7 +87,7 @@ pipeline {
         stage('Parse Extent Report Latest') {
     steps {
         script {
-            def extentFiles = findFiles(glob: "${EXTENT_REPORT_PATTERN}")
+            def extentFiles = findFiles(glob: "${SUREFIRE_REPORT_PATTERN}")
             def extentFile = extentFiles ? extentFiles[0].path : null
 
             def passedCount = 0
@@ -200,8 +200,8 @@ stage('Format Extent Report Summary Latest') {
                 script {
                    
                     emailext(
-            subject: "📢 Test Execution Results: ${currentBuild.currentResult}",
-            to: "team@example.com",
+            subject: "📢 Send Email Latest :: Test Execution Results: ${currentBuild.currentResult}",
+            to: "venki.ralami@gmail.com",
             mimeType: 'text/html',
             body: "${env.SUMMARY_HTML}"
         )
@@ -297,7 +297,7 @@ stage('Format Extent Report Summary Latest') {
 
                 // Summary table
                 def summaryTable = """
-                    <h4>TestNG Execution Summary</h4>
+                    <h4>TestNG Execution Summary Now</h4>
                     <table border="1" cellpadding="5" cellspacing="0">
                         <tr><th>Total</th><th>Passed</th><th>Failed</th><th>Skipped</th><th>Ignored</th></tr>
                         <tr>
@@ -313,15 +313,15 @@ stage('Format Extent Report Summary Latest') {
                 // Email body
                 def emailBody = """
                     ${summaryTable}
-                    <br><br>
+                    <br>
                     <h4>Jenkins Build URL:</h4>
                     <a href='${env.BUILD_URL}'>${env.BUILD_URL}</a>
-                    <br><br>
+                    <br>
                     <h4>Extent Report:</h4>
                     📊 <a href="${env.BUILD_URL}artifact/${extentReportPath}">View Full Extent Report</a>
-                    <br><br>
+                    <br>
                     <p>🔗 <a href="${SONAR_URL}/dashboard?id=${SONAR_PROJECT_KEY}">View Full SonarQube Report</a></p>
-                    <br><br>
+                    <br>
                     ${extentReportHtml}
                 """
 
