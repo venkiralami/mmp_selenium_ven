@@ -9,8 +9,10 @@ import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.Assert;
 
 /**
  * 
@@ -61,6 +63,15 @@ public class LoginPage{
 		String alertMsg= handleAlertIfPresent(driver);
 		
 		return alertMsg;
+	}
+	
+	public String loginEmptyUser(String userName, String password) {
+		driver.findElement(xPath_uName).sendKeys(userName);
+		driver.findElement(xPath_pw).sendKeys(password);
+		driver.findElement(xPath_signIn).click();
+		WebElement errorMsg = driver.findElement(By.id("username")); // 🔹 locator of inline message
+	        String actualMsg = errorMsg.getText();
+		return actualMsg;
 	}
 	
 	public String handleAlertIfPresent(WebDriver driver) {

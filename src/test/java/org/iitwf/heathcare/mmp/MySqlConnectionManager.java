@@ -30,6 +30,7 @@ public class MySqlConnectionManager
 				ResultSet rs = stmt.executeQuery("Selet * from testDB.employee");
 				//rs.last();
 				int rows = rs.getRow();
+				System.out.println("No Of rows: " + rows);
 				if (rows == 0) {
 					System.out.println("No data found in the table.");
 					return;

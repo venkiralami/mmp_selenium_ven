@@ -51,6 +51,42 @@ public class LoginPageTest extends BaseTest{
 		loginPage.loginValidUser(uName, pw);
     }
 	
+    @DataProvider(name = "loginData")
+    public Object[][] getLoginData() {
+        return new Object[][]{
+            // username, password, expectedResult
+            {"ria1", "Ria12345", "success", "home"},   // valid login
+            {"invalidUser", "Ria12345", "failure","Wrong username and password. " }, // invalid username
+            {"ria1", "wrongPass", "failure","Wrong username and password. "},      // invalid password
+            {"", "Ria12345", "failure",""},            // empty username
+            {"ria1", "", "failure",""},               // empty password
+            {"", "", "failure",""}                         // both empty
+        };
+    }
+
+    @Test(dataProvider = "loginData")
+    public void loginTest1(String uName, String pw, String loginDataType, String expectedMsg) throws IOException {
+        driver = launchBrowser();
+		LoginPage loginPage = new LoginPage(driver);
+		if(loginDataType.equalsIgnoreCase("failure")) {
+			String invalidMsg = loginPage.loginEmptyUser(uName, pw);
+			if(uName.isEmpty() && pw.isEmpty()) {
+				Assert.assertEquals(invalidMsg, expectedMsg, "Login was not successful, isEmpty() && pw.isEmpty Field empty");
+			} else if(uName.isEmpty()) {
+				Assert.assertEquals(invalidMsg, expectedMsg, "Login was not successful, uName Field empty");
+			} else if(pw.isEmpty()) {
+				Assert.assertEquals(invalidMsg, expectedMsg, "Login was not successful, pw.isEmpty() Field empty");
+			} else {
+				String invalidCreds = loginPage.loginInValidUser(uName, pw);
+				Assert.assertEquals(invalidCreds, expectedMsg, "Login was not successful, Wrong credentials");
+			}
+			} else if(loginDataType.equalsIgnoreCase("success")) {
+			loginPage.loginValidUser(uName, pw);
+			Assert.assertEquals(driver.getTitle(), "home", "Login was not successful, Home Page title mismatch.");
+		}
+		driver.quit();	
+    }
+    
     @AfterTest
 	public void closeBrowser(){
 		// Close the browser
