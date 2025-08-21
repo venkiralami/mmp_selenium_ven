@@ -242,10 +242,9 @@ stage('Format Extent Report Summary Latest') {
         }
 
         
-        stage('Publish HTML Reports') {
+       stage('Publish HTML Reports') {
     steps {
-        publishHTML([
-            // Surefire Report
+        publishHTML(targets: [
             [
                 reportDir: 'target/surefire-reports',
                 reportFiles: 'index.html',
@@ -254,18 +253,86 @@ stage('Format Extent Report Summary Latest') {
                 allowMissing: false,
                 alwaysLinkToLastBuild: true
             ],
-            // Extent Report
             [
                 reportDir: 'target',
-                reportFiles: 'ExtentReport_*.html',   // ✅ use wildcard
+                reportFiles: 'ExtentReport_*.html',
                 reportName: 'Extent Report',
                 keepAll: true,
-                allowMissing: true,                  // allow missing in case report not generated
+                allowMissing: true,
                 alwaysLinkToLastBuild: true
             ]
         ])
     }
 }
+
+stage('Send Extent Report Summary Email') {
+    steps {
+        script {
+            // 1️⃣ Find the latest ExtentReport HTML in target folder
+            def extentFile = sh(
+                script: "ls -t target/ExtentReport_*.html | head -1",
+                returnStdout: true
+            ).trim()
+
+            echo "📄 Latest Extent Report: ${extentFile}"
+
+            // 2️⃣ Read HTML content
+            def htmlContent = readFile(extentFile)
+
+            // 3️⃣ Parse test results
+            def passed = 0
+            def failed = 0
+            def skipped = 0
+            def failedTests = []
+
+            // Simple regex parsing (adjust selectors depending on your Extent HTML version)
+            htmlContent.eachLine { line ->
+                if (line.contains("test-name")) {
+                    def statusMatcher = line =~ /<span class="status (pass|fail|skip)">/
+                    if (statusMatcher) {
+                        def status = statusMatcher[0][1]
+                        if (status == "pass") {
+                            passed++
+                        } else if (status == "fail") {
+                            failed++
+                            // capture test name
+                            def nameMatcher = line =~ /<div class="test-name">(.+?)<\/div>/
+                            if (nameMatcher) failedTests << nameMatcher[0][1]
+                        } else if (status == "skip") {
+                            skipped++
+                        }
+                    }
+                }
+            }
+
+            echo "✅ Passed: ${passed}"
+            echo "❌ Failed: ${failed}"
+            echo "⚠️ Skipped: ${skipped}"
+            echo "Failed Tests: ${failedTests.join(', ')}"
+
+            // 4️⃣ Build HTML summary for email
+            def summary = """
+                <p><b>Test Summary</b></p>
+                <ul>
+                    <li>✅ Passed: ${passed}</li>
+                    <li>❌ Failed: ${failed}</li>
+                    <li>⚠️ Skipped: ${skipped}</li>
+                </ul>
+                <p><b>Failed Tests:</b> ${failedTests.join(', ')}</p>
+                <p>Full report: <a href="${env.BUILD_URL}HTML_20Report/Extent_20Report/">Extent Report</a></p>
+            """
+
+            // 5️⃣ Send email
+            emailext(
+                subject: "Build #${env.BUILD_NUMBER} - Test Summary Extent",
+                body: summary,
+                mimeType: 'text/html',
+                to: 'venki.ralami@gmail.com'
+            )
+        }
+    }
+}
+
 
         stage('SonarQube Analysis') {
             steps {
