@@ -36,7 +36,7 @@ pipeline {
         
         stage('Archive Reports') {
             steps {
-                archiveArtifacts artifacts: "${SUREFIRE_REPORT_PATTERN}, ${EXTENT_REPORT_PATTERN}", fingerprint: true
+                archiveArtifacts artifacts: "${SUREFIRE_REPORT_PATTERN}, ${EXTENT_REPORT_PATTERN}", fingerprint: true, allowEmptyArchive: true
             }
         }
 
@@ -84,10 +84,10 @@ pipeline {
             }
         }
         
-        stage('Parse Extent Report Latest') {
+        stage('Parse Extent Report Lat') {
     steps {
         script {
-            def extentFiles = findFiles(glob: "${SUREFIRE_REPORT_PATTERN}")
+            def extentFiles = findFiles(glob: "${EXTENT_REPORT_PATTERN}")
             def extentFile = extentFiles ? extentFiles[0].path : null
 
             def passedCount = 0
@@ -157,7 +157,7 @@ stage('Format Extent Report Summary Latest') {
                   </style>
                 </head>
                 <body>
-                  <h3>📊 Test Execution Summary</h3>
+                  <h3>📊 Test Execution Summary Lat:</h3>
                   <table>
                     <tr>
                       <th>Metric</th>
@@ -200,7 +200,7 @@ stage('Format Extent Report Summary Latest') {
                 script {
                    
                     emailext(
-            subject: "📢 Send Email Latest :: Test Execution Results: ${currentBuild.currentResult}",
+            subject: "📢 Send Email Lat :: Test Execution Results: ${currentBuild.currentResult}",
             to: "venki.ralami@gmail.com",
             mimeType: 'text/html',
             body: "${env.SUMMARY_HTML}"
@@ -241,19 +241,32 @@ stage('Format Extent Report Summary Latest') {
             }
         }
 
-        stage('Publish HTML Report') {
-            steps {
-                publishHTML([
-                    reportDir: 'target/surefire-reports',
-                    reportFiles: 'index.html',
-                    reportName: 'Surefire Report',
-                    keepAll: true,
-                    allowMissing: false,
-                    alwaysLinkToLastBuild: true
-                ])
-            }
-        }
         
+        stage('Publish HTML Reports') {
+    steps {
+        publishHTML([
+            // Surefire Report
+            [
+                reportDir: 'target/surefire-reports',
+                reportFiles: 'index.html',
+                reportName: 'Surefire Report',
+                keepAll: true,
+                allowMissing: false,
+                alwaysLinkToLastBuild: true
+            ],
+            // Extent Report
+            [
+                reportDir: 'target',
+                reportFiles: 'ExtentReport_*.html',   // ✅ use wildcard
+                reportName: 'Extent Report',
+                keepAll: true,
+                allowMissing: true,                  // allow missing in case report not generated
+                alwaysLinkToLastBuild: true
+            ]
+        ])
+    }
+}
+
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv("${SONARQUBE_ENV}") {
