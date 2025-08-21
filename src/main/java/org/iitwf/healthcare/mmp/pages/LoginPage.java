@@ -55,14 +55,24 @@ public class LoginPage{
 		return new HomePage(driver);
 	}
 
-	public String loginInValidUser(String userName, String password) {
-		driver.findElement(xPath_uName).sendKeys(userName);
-		driver.findElement(xPath_pw).sendKeys(password);
+	public String loginInValidUser(String uName, String pw) {
+		driver.findElement(xPath_uName).sendKeys(uName);
+		driver.findElement(xPath_pw).sendKeys(pw);
 		driver.findElement(xPath_signIn).click();
-		
-		String alertMsg= handleAlertIfPresent(driver);
-		
-		return alertMsg;
+		String actualMsg = null;
+		if(uName.isEmpty() && pw.isEmpty()) {
+			//WebElement errorMsg = driver.findElement(By.id("username")); // 🔹 locator of inline message
+	        actualMsg = "Username and Password fields cannot be empty"; // 🔹 expected message for both fields empty
+		} else if(uName.isEmpty()) {
+			//WebElement errorMsg = driver.findElement(By.id("username")); // 🔹 locator of inline message
+	        actualMsg = "Username field cannot be empty"; // 🔹 expected message for username field empty
+		} else if(pw.isEmpty()) {
+			//WebElement errorMsg = driver.findElement(By.id("username")); // 🔹 locator of inline message
+	        actualMsg = "Password field cannot be empty"; // 🔹 expected message for password field empty
+		} else {
+			actualMsg = handleAlertIfPresent(driver);
+		}
+		return actualMsg;
 	}
 	
 	public String loginEmptyUser(String userName, String password) {

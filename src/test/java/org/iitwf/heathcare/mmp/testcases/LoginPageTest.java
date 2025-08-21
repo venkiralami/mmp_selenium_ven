@@ -43,8 +43,8 @@ public class LoginPageTest extends BaseTest{
 	 }
 
     @Test(dataProvider = "excelData")
-    public void loginTest(String username, String password, String status) {
-        System.out.println("Username: " + username + " | Password: " + password+ " | Status: " + status);
+    public void loginTest(String uName, String pw, String status) {
+        System.out.println("Username: " + uName + " | Password: " + pw+ " | Status: " + status);
         // Add your Selenium/Playwright code here
         driver = launchBrowser();
 		LoginPage loginPage = new LoginPage(driver);
@@ -58,13 +58,13 @@ public class LoginPageTest extends BaseTest{
             {"ria1", "Ria12345", "success", "home"},   // valid login
             {"invalidUser", "Ria12345", "failure","Wrong username and password. " }, // invalid username
             {"ria1", "wrongPass", "failure","Wrong username and password. "},      // invalid password
-            {"", "Ria12345", "failure",""},            // empty username
-            {"ria1", "", "failure",""},               // empty password
-            {"", "", "failure",""}                         // both empty
+            {"", "Ria12345", "failure","Username field cannot be empty"},            // empty username
+            {"ria1", "", "failure","Password field cannot be empty"},               // empty password
+            {"", "", "failure","Username and Password fields cannot be empty"}                         // both empty
         };
     }
 
-    @Test(dataProvider = "loginData")
+   
     public void loginTest1(String uName, String pw, String loginDataType, String expectedMsg) throws IOException {
         driver = launchBrowser();
 		LoginPage loginPage = new LoginPage(driver);
@@ -85,6 +85,26 @@ public class LoginPageTest extends BaseTest{
 			Assert.assertEquals(driver.getTitle(), "home", "Login was not successful, Home Page title mismatch.");
 		}
 		driver.quit();	
+    }
+    
+    // 🔹 Test method using DataProvider
+    @Test(dataProvider = "loginData")
+    public void loginTestSameMethod(String uName, String pw, String loginType, String expectedMsg) throws IOException {
+        driver = launchBrowser();
+        LoginPage loginPage = new LoginPage(driver);
+
+        String actualMessage = null;
+
+        if (loginType.equals("success")) {
+        	loginPage.loginValidUser(uName, pw);
+        	actualMessage = driver.getTitle();
+		}else if (loginType.equals("failure")) {
+			// 🔹 Example: handle alert for invalid login
+			actualMessage = loginPage.loginInValidUser(uName, pw);
+		}
+        System.out.println("Username: " + uName + " | Password: " + pw+ " | LoginType: " + loginType+ " | Expected : "+expectedMsg+ " | Actual : "+actualMessage);
+        Assert.assertEquals(actualMessage, expectedMsg, 
+            "Validation message mismatch for user: " + uName);
     }
     
     @AfterTest
