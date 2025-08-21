@@ -242,28 +242,30 @@ stage('Format Extent Report Summary Latest') {
         }
 
         
-       stage('Publish HTML Reports') {
+      stage('Publish HTML Reports') {
     steps {
-        publishHTML(targets: [
-            [
-                reportDir: 'target/surefire-reports',
-                reportFiles: 'index.html',
-                reportName: 'Surefire Report',
-                keepAll: true,
-                allowMissing: false,
-                alwaysLinkToLastBuild: true
-            ],
-            [
-                reportDir: 'target',
-                reportFiles: 'ExtentReport_*.html',
-                reportName: 'Extent Report',
-                keepAll: true,
-                allowMissing: true,
-                alwaysLinkToLastBuild: true
-            ]
+        // 1️⃣ Publish Surefire Report
+        publishHTML([
+            reportDir: 'target/surefire-reports',
+            reportFiles: 'index.html',
+            reportName: 'Surefire Report',
+            keepAll: true,
+            allowMissing: false,
+            alwaysLinkToLastBuild: true
+        ])
+
+        // 2️⃣ Publish Extent Report
+        publishHTML([
+            reportDir: 'target',
+            reportFiles: 'ExtentReport_*.html',
+            reportName: 'Extent Report',
+            keepAll: true,
+            allowMissing: true,
+            alwaysLinkToLastBuild: true
         ])
     }
 }
+
 
 stage('Send Extent Report Summary Email') {
     steps {
