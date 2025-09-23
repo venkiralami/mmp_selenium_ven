@@ -10,6 +10,9 @@
       <class name="org.iitwf.heathcare.mmp.testcases.SendMessagesE2E"/>
      <class name="org.iitwf.heathcare.mmp.testcases.ScheduleAppointmentTests_POM"/>
       <class name="org.iitwf.heathcare.mmp.testcases.ProfilePageTest"/>
+ <class name="org.iitwf.heathcare.mmp.testcases.LoginPageTest"/>
+ <class name="org.iitwf.heathcare.mmp.testcases.MessagesPageTest"/>
+      <class name="org.iitwf.heathcare.mmp.testcases.MessagesPageTest"/>
     </classes>
   </test> <!-- Test -->
 </suite> <!-- Suite -->

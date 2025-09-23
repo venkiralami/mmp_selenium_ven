@@ -9,6 +9,7 @@ import org.iitwf.healthcare.mmp.BaseTest;
 import org.iitwf.healthcare.mmp.pages.HomePage;
 import org.iitwf.healthcare.mmp.pages.LoginPage;
 import org.iitwf.healthcare.mmp.pages.ProfilePage;
+import org.iitwf.healthcare.mmp.utils.JiraID;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -32,7 +33,21 @@ public class ProfilePageTest extends BaseTest{
 		// TODO Auto-generated method stub
 
 	}
+
 	@Test
+	@JiraID("SCRUM-1")
+	public void JiraTest1() {
+		Assert.assertTrue(true);  // pass
+	}
+
+	@Test
+	@JiraID("SCRUM-2")
+	public void JiraTest2() {
+		Assert.assertTrue(false); // fail
+	}
+
+	@Test(description = "SCRUM-3")
+	@JiraID("SCRUM-3")
 	public void profileMainTest() throws InterruptedException {
 		// TODO Auto-generated method stub
 		driver = launchBrowser();
@@ -50,7 +65,8 @@ public class ProfilePageTest extends BaseTest{
 
 	}
 
-	@Test
+	@Test(description = "SCRUM-4")
+	@JiraID("SCRUM-4")
 	public void profileMainTestFailScenario() throws InterruptedException {
 		// TODO Auto-generated method stub
 		/*
@@ -69,11 +85,11 @@ public class ProfilePageTest extends BaseTest{
 	@AfterTest
 	public void closeBrowser(){
 		// Close the browser
-				if (driver != null) {
-				driver.quit();	
-				}
-			}
-	
+		if (driver != null) {
+			driver.quit();	
+		}
+	}
+
 
 
 }

@@ -2,7 +2,7 @@
 <!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
 <suite name="Suite">
 	<listeners>
-		<listener class-name="org.iitwf.healthcare.mmp.utils.ListenerUtility" />
+		<listener class-name="org.iitwf.healthcare.mmp.utils.ListenerUtilityForZephyrUpdate" />
 	</listeners>
 	<test thread-count="5" name="Test">
 		<classes>

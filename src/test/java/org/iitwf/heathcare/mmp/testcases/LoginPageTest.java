@@ -65,27 +65,7 @@ public class LoginPageTest extends BaseTest{
     }
 
    
-    public void loginTest1(String uName, String pw, String loginDataType, String expectedMsg) throws IOException {
-        driver = launchBrowser();
-		LoginPage loginPage = new LoginPage(driver);
-		if(loginDataType.equalsIgnoreCase("failure")) {
-			String invalidMsg = loginPage.loginEmptyUser(uName, pw);
-			if(uName.isEmpty() && pw.isEmpty()) {
-				Assert.assertEquals(invalidMsg, expectedMsg, "Login was not successful, isEmpty() && pw.isEmpty Field empty");
-			} else if(uName.isEmpty()) {
-				Assert.assertEquals(invalidMsg, expectedMsg, "Login was not successful, uName Field empty");
-			} else if(pw.isEmpty()) {
-				Assert.assertEquals(invalidMsg, expectedMsg, "Login was not successful, pw.isEmpty() Field empty");
-			} else {
-				String invalidCreds = loginPage.loginInValidUser(uName, pw);
-				Assert.assertEquals(invalidCreds, expectedMsg, "Login was not successful, Wrong credentials");
-			}
-			} else if(loginDataType.equalsIgnoreCase("success")) {
-			loginPage.loginValidUser(uName, pw);
-			Assert.assertEquals(driver.getTitle(), "home", "Login was not successful, Home Page title mismatch.");
-		}
-		driver.quit();	
-    }
+    
     
     // 🔹 Test method using DataProvider
     @Test(dataProvider = "loginData")
